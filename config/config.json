@@ -1,4 +1,8 @@
 {
+    "store": {
+        "generalId": "4308630863935",
+        "clubId": "4308639121471"
+    },
     "shopify": {
         "apiUrl": "https://a3a15257123795c65ba63d51890995b1:47fa3943f152403b51f95601c4f9ce59@pebble-beach-concours-delegance.myshopify.com",
         "apiKey": "a3a15257123795c65ba63d51890995b1",
