@@ -6,8 +6,6 @@ const axios = require('axios');
 const { check, validationResult } = require('express-validator/check');
 
 router.get('/all', [
-    // productId must be a number
-    check('productId').isInt(),
     check('status').isString()
   ], (req, res) => {
     // Finds the validation errors in this request and wraps them in an object with handy functions
@@ -18,7 +16,6 @@ router.get('/all', [
     }
 
     var promises = [];
-    var productId = req.query.productId;
     var status = req.query.status;
     var orders = {};
     var finalList = [];
@@ -110,13 +107,3 @@ router.get('/all', [
 
 module.exports = router; 
 
-
-
-/*
-productId = 1231
-{
-"product": 11111,
-"recommendation2": 22222,
-"recommendation3": 33333
-}
-*/
