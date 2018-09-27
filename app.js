@@ -28,6 +28,6 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/orders', ordersRouter);
 app.use('/products', productsRouter);
-app.use('/tickets', productsRouter);
+app.use('/tickets', ticketsRouter);
 
 module.exports = app;
