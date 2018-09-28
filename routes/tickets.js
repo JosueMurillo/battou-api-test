@@ -42,7 +42,8 @@ router.get('/all', [
           ticketName:         "",
           ticketLastname:     "",
           ticketType:         "",
-          ticketLineItem:     ""
+          ticketLineItem:     "",
+          ticketId:           ""
         };
 
         orders[order.id] = shopifyOrderOb;
@@ -93,6 +94,7 @@ router.get('/all', [
                   newOrder.ticketLastname = ticket_list[k].lastName;
                   newOrder.ticketType     = ticket_list[k].ticket_type;
                   newOrder.ticketLineItem = ticket_list[k].line_item;
+                  newOrder.ticketId       = ticket_list[k].ticket_id;
                   finalList.push(newOrder);
                 }
             }
@@ -104,6 +106,137 @@ router.get('/all', [
       });
     });
 });
+
+
+
+router.put('/metadata', [
+    check('metadata').isJSON()
+  ], (req, res) => {
+    // Finds the validation errors in this request and wraps them in an object with handy functions
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    var promises = [];
+    var metadata = JSON.parse(req.body.metadata);
+    var orderId = metadata.orderId
+    //Get the metadata of a certain order
+    api.getData('/admin/orders/' + orderId + '/metafields.json').then(response => {
+      var ordersMetadata = response.metafields;
+      ordersMetadata.forEach(metafield => {
+        var shopifyMetaOb = {
+                metafield: {
+                  id: "",
+                  value: ""
+                }
+        }
+
+        if (metafield.key == "is_gift" && metafield.value != metadata.is_gift) {
+          shopifyMetaOb = {
+            metafield: {
+              id: metafield.id,
+              value: metadata.isGift
+            }
+          }
+          api.putData('/admin/metafields/' + metafield.id + '.json',shopifyMetaOb).then(response => {
+          }).catch(error => {
+              res.status(400).send(error.response.data);
+            });         
+        }
+
+        if (metafield.key == "will_call" && metafield.value != metadata.will_call) {
+          shopifyMetaOb = {
+            metafield: {
+              id: metafield.id,
+              value: metadata.willCall
+            }
+          }
+          api.putData('/admin/metafields/' + metafield.id + '.json',shopifyMetaOb).then(response => {
+          }).catch(error => {
+              res.status(400).send(error.response.data);
+            }); 
+        }
+
+        if (metafield.key == "gift_name" && metafield.value != metadata.gift_name) {
+            shopifyMetaOb = {
+              metafield: {
+                id: metafield.id,
+                value: metadata.giftName
+              }
+            }
+            api.putData('/admin/metafields/' + metafield.id + '.json',shopifyMetaOb).then(response => {
+            }).catch(error => {
+                res.status(400).send(error.response.data);
+              }); 
+        }
+
+        if (metafield.key == "gift_mail" && metafield.value != metadata.gift_mail) {
+            shopifyMetaOb = {
+              metafield: {
+                id: metafield.id,
+                value: metadata.giftMail
+              }
+            }
+            api.putData('/admin/metafields/' + metafield.id + '.json',shopifyMetaOb).then(response => {
+            }).catch(error => {
+                res.status(400).send(error.response.data);
+              }); 
+        }
+
+        if (metafield.key == "gift_message" && metafield.value != metadata.gift_message) {
+            shopifyMetaOb = {
+              metafield: {
+                id: metafield.id,
+                value: metadata.giftMessage
+              }
+            }
+            api.putData('/admin/metafields/' + metafield.id + '.json',shopifyMetaOb).then(response => {
+            }).catch(error => {
+                res.status(400).send(error.response.data);
+              }); 
+        }
+
+        if (metafield.key == "ticket_list") {
+
+          var ticketList = JSON.parse(metafield.value);
+          var newTicketList = [];
+          ticketList.forEach(ticket => {
+            if (ticket.ticket_id == metadata.ticketId && ticket.number   != metadata.ticketNumber) {
+              ticket.number   = metadata.ticketNumber;
+            }
+            if (ticket.ticket_id == metadata.ticketId && ticket.name     != metadata.ticketName) {
+              ticket.name     = metadata.ticketName;
+            }
+            if (ticket.ticket_id == metadata.ticketId && ticket.lastName != metadata.ticketLastname) {
+              ticket.lastName = metadata.ticketLastname;
+            }
+            if (ticket.ticket_id == metadata.ticketId && ticket.status   != metadata.ticketStatus) {
+              ticket.status   = metadata.ticketStatus;
+            }
+
+            newTicketList.push(ticket);
+          });  
+          shopifyMetaOb = {
+            metafield: {
+              id: metafield.id,
+              value: JSON.stringify(newTicketList)
+            }
+          }
+          
+         api.putData('/admin/metafields/' + metafield.id + '.json',shopifyMetaOb).then(response => {
+          }).catch(error => {
+              res.status(400).send(error.response.data);
+             });     
+        }
+      });//end of the forEach ordersMetadata metafield
+      res.send("done!");
+    }).catch(error => {
+        res.status(400).send(error.response.data);
+      });    
+});
+
 
 module.exports = router; 
 
