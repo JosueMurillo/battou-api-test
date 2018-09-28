@@ -231,7 +231,7 @@ router.put('/metadata', [
              });     
         }
       });//end of the forEach ordersMetadata metafield
-      res.send("done!");
+      res.send(metadata);
     }).catch(error => {
         res.status(400).send(error.response.data);
       });    
