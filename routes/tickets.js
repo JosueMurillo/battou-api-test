@@ -75,28 +75,33 @@ router.get('/all', [
           for (var j = 0; j < metafieldsData.length; j++) {
             if(metafieldsData[j].key == "ticket_list"){
                 var ticket_list = JSON.parse(metafieldsData[j].value);
+                var newOrder = {
+                    orderId:              orders[orderId].orderId,
+                    dateCreated:          orders[orderId].dateCreated,
+                    orderNumber:          orders[orderId].orderNumber,
+                    totalPrice:           orders[orderId].totalPrice,
+                    fullfillmentStatus:   orders[orderId].fullfillmentStatus,
+                    willCall:             orders[orderId].willCall,
+                    isGift:               orders[orderId].isGift,
+                    giftMail:             orders[orderId].giftMail,
+                    giftName:             orders[orderId].giftName,
+                    giftMessage:          orders[orderId].giftMessage,
+                    ticketList:           []
+                };
                 for (var k = 0; k < ticket_list.length; k++) {
-                  var newOrder = {};
-                  newOrder.orderId            = orders[orderId].orderId;
-                  newOrder.dateCreated        = orders[orderId].dateCreated;
-                  newOrder.orderNumber        = orders[orderId].orderNumber;
-                  newOrder.totalPrice         = orders[orderId].totalPrice;
-                  newOrder.fullfillmentStatus = orders[orderId].fullfillmentStatus;
-                  newOrder.willCall           = orders[orderId].willCall;
-                  newOrder.isGift             = orders[orderId].isGift;
-                  newOrder.giftMail           = orders[orderId].giftMail;
-                  newOrder.giftName           = orders[orderId].giftName;
-                  newOrder.giftMessage        = orders[orderId].giftMessage;
-
-                  newOrder.ticketNumber   = ticket_list[k].number;
-                  newOrder.ticketStatus   = ticket_list[k].status;
-                  newOrder.ticketName     = ticket_list[k].name;
-                  newOrder.ticketLastname = ticket_list[k].lastName;
-                  newOrder.ticketType     = ticket_list[k].ticket_type;
-                  newOrder.ticketLineItem = ticket_list[k].line_item;
-                  newOrder.ticketId       = ticket_list[k].ticket_id;
-                  finalList.push(newOrder);
+                  var newTicket = {
+                    ticketNumber:   ticket_list[k].number,
+                    ticketStatus:   ticket_list[k].status,
+                    ticketName:     ticket_list[k].name,
+                    ticketLastname: ticket_list[k].lastName,
+                    ticketType:     ticket_list[k].ticket_type,
+                    ticketLineItem: ticket_list[k].line_item,
+                    ticketId:       ticket_list[k].ticket_id,
+                    ticketTitle:    ticket_list[k].ticket_title,
+                  }
+                  newOrder.ticketList.push(newTicket); 
                 }
+                finalList.push(newOrder);
             }
           }
         }
