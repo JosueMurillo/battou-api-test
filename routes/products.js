@@ -5,6 +5,8 @@ var config = require("../config/config.json");
 const axios = require('axios'); 
 const { check, validationResult } = require('express-validator/check');
 
+
+//Adds recommendations to products.
 router.put('/recommendations', [
     // productId must be a number
     check('productId').isInt(),
@@ -42,7 +44,7 @@ router.put('/recommendations', [
               res.status(400).send(error.response.data);
             });
 });
-
+//Deletes all recommendations for products.
 router.delete('/recommendations', [
     // productId must be a number
     check('productId').isInt()
@@ -56,15 +58,16 @@ router.delete('/recommendations', [
     api.getData('/admin/products/'+productId+'/metafields.json')
       .then(response => {
         var productList = response["metafields"];
-        for(var i = 0; i < productList.length; i++) {  
-           api.deleteData('/admin/products/'+productId+'/metafields/'+ productList[i].id+'.json')
-            .then(response => {
-              //res.send(response);
-            })
-            .catch(error => {
-              res.status(400).send(error.response.data);
-            });
-          
+        for(var i = 0; i < productList.length; i++) {   
+          if (productList[i].key != "description_tag" && productList[i].key != "title_tag" ) {
+            api.deleteData('/admin/products/'+productId+'/metafields/'+ productList[i].id+'.json')
+                      .then(response => {
+                        //res.send(response);
+                      })
+                      .catch(error => {
+                        res.status(400).send(error.response.data);
+                      });
+          }
         }
       res.send(response);
       })
@@ -73,6 +76,7 @@ router.delete('/recommendations', [
       });
 
 });
+//Deletes a single recommendation from a product
 
 router.delete('/recommendation', [
     // productId must be a number
@@ -115,6 +119,39 @@ router.delete('/recommendation', [
       });
 
 });
+
+//Gets recommendations for a product recommendations to products.
+router.get('/recommendations', [
+    // productId must be a number
+    check('productId').isInt()
+  ], (req, res) => {
+    // Finds the validation errors in this request and wraps them in an object with handy functions
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    var productId = req.query.productId
+    var arrayId = [];
+    
+    api.getData('/admin/products/'+productId+'/metafields.json')
+            .then(response => {
+              var result = {
+                recommendations: []
+              };
+              var metaData = response["metafields"];
+              metaData.forEach(order => {
+                if (order.key != "description_tag" && order.key != "title_tag" ) {
+                    result.recommendations.push({key:order.key,recommendationId:order.value});
+                }
+              });
+              res.send(result);
+            })
+            .catch(error => {
+              res.status(400).send(error.response.data);
+            });
+});
+
+
 
 module.exports = router; 
 
