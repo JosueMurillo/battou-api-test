@@ -117,6 +117,88 @@ router.get('/all', [
 });
 
 
+//Get the data of a specific order.
+router.get('/ticketdata', [
+    check('status').isString(),
+    check('orderId').isInt()
+  ], (req, res) => {
+    // Finds the validation errors in this request and wraps them in an object with handy functions
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    var promises = [];
+    var status = req.query.status;
+    var orderId= req.query.orderId;
+    //Get all the orders with a certain status
+    api.getData('/admin/orders/'+ orderId +'.json?status='+status).then(response => {
+      var order = response.order;
+
+      api.getData('/admin/orders/'+orderId+'/metafields.json').then(response => {
+        shopifyOrderOb = {
+          orderId:            order.id,
+          dateCreated:        order.created_at,
+          orderNumber:        order.name,
+          totalPrice:         order.total_price,
+          fullfillmentStatus: order.fulfillment_status,
+          name:               order.billing_address.first_name,
+          lastname:           order.billing_address.last_name,
+          willCall:           "",
+          isGift:             "",
+          giftName:           "",
+          giftMail:           "",
+          giftMessage:        "",
+          ticketList:         [],
+        }; 
+
+      
+          var metafieldsData = response["metafields"];
+          //Iterate throught the metafields and map every metafield.
+        for (var j = 0; j < metafieldsData.length; j++) {
+          if(metafieldsData[j].key == "will_call"){
+            shopifyOrderOb.willCall = metafieldsData[j].value;
+          }
+          if(metafieldsData[j].key == "is_gift"){
+            shopifyOrderOb.isGift = metafieldsData[j].value;
+          }
+          if(metafieldsData[j].key == "gift_mail"){
+            shopifyOrderOb.giftMail = metafieldsData[j].value;
+          }
+          if(metafieldsData[j].key == "gift_name"){
+            shopifyOrderOb.giftName = metafieldsData[j].value;
+          }
+          if(metafieldsData[j].key == "gift_message"){
+            shopifyOrderOb.giftMessage = metafieldsData[j].value;
+          }
+          if(metafieldsData[j].key == "ticket_list"){
+            var ticket_list = JSON.parse(metafieldsData[j].value);
+            for (var k = 0; k < ticket_list.length; k++) {
+              var newTicket = {
+                ticketNumber:   ticket_list[k].number,
+                ticketStatus:   ticket_list[k].status,
+                ticketName:     ticket_list[k].name,
+                ticketLastname: ticket_list[k].lastName,
+                ticketType:     ticket_list[k].ticket_type,
+                ticketLineItem: ticket_list[k].line_item,
+                ticketId:       ticket_list[k].ticket_id,
+                ticketTitle:    ticket_list[k].ticket_title,
+              }
+              shopifyOrderOb.ticketList.push(newTicket); 
+            }
+          }
+        }
+        res.send(shopifyOrderOb);
+      }).catch(error => {
+        res.status(400).send(error.response.data);
+      });
+    }).catch(error => {
+        res.status(400).send(error.response.data);
+    });
+
+});
+
 
 router.put('/metadata', [
     check('metadata').isJSON()
