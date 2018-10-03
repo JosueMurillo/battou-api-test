@@ -69,7 +69,7 @@ router.put('/metadata', [
               clubCurrentConsecutive++;
             }
             if (data['ticket_list'][ticketkey].ticket_type == 'tickets') {
-              data['ticket_list'][ticketkey].number = "-";
+              data['ticket_list'][ticketkey].number = 0;
             }
           });
 
