@@ -52,11 +52,14 @@ router.get('/all', [
       });
         
       Promise.all(promises).then(results => {
-        for (var i = 0; i < results.length; i++) {
+        
+        for (var i in results) {
           var metafieldsData = results[i].metafields;
-          var orderId = metafieldsData[i].owner_id;;
+          
+          var orderId;
           //Iterate throught the metafields and map every metafield.
-          for (var j = 0; j < metafieldsData.length; j++) {
+          for (var j in metafieldsData) {
+            orderId = metafieldsData[j].owner_id;
             if(metafieldsData[j].key == "will_call"){
               orders[orderId].willCall = metafieldsData[j].value;
             }
@@ -74,7 +77,7 @@ router.get('/all', [
             }
           }
           //Iterate through the ticket list to create a row for each ticket on the ticket list metafield
-          for (var j = 0; j < metafieldsData.length; j++) {
+          for (var j in metafieldsData) {
             if(metafieldsData[j].key == "ticket_list"){
                 var ticket_list = JSON.parse(metafieldsData[j].value);
                 var newOrder = {
@@ -92,7 +95,7 @@ router.get('/all', [
                     giftMessage:          orders[orderId].giftMessage,
                     ticketList:           []
                 };
-                for (var k = 0; k < ticket_list.length; k++) {
+                for (var k in ticket_list) {
                   var newTicket = {
                     ticketNumber:   ticket_list[k].number,
                     ticketStatus:   ticket_list[k].status,
@@ -111,6 +114,7 @@ router.get('/all', [
         }
         res.send(finalList);
       }).catch(error => {
+        console.log(error);
         res.status(400).send(error.response.data);
       });
     });
@@ -156,7 +160,7 @@ router.get('/ticketdata', [
       
           var metafieldsData = response["metafields"];
           //Iterate throught the metafields and map every metafield.
-        for (var j = 0; j < metafieldsData.length; j++) {
+        for (var j in metafieldsData) {
           if(metafieldsData[j].key == "will_call"){
             shopifyOrderOb.willCall = metafieldsData[j].value;
           }
@@ -174,7 +178,7 @@ router.get('/ticketdata', [
           }
           if(metafieldsData[j].key == "ticket_list"){
             var ticket_list = JSON.parse(metafieldsData[j].value);
-            for (var k = 0; k < ticket_list.length; k++) {
+            for (var k in ticket_list) {
               var newTicket = {
                 ticketNumber:   ticket_list[k].number,
                 ticketStatus:   ticket_list[k].status,
