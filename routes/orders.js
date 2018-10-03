@@ -64,11 +64,13 @@ router.put('/metadata', [
               data['ticket_list'][ticketkey].number = generalCurrentConsecutive+1;
               generalCurrentConsecutive++;
             }
-            else{
+            if (data['ticket_list'][ticketkey].ticket_type == 'club') {
               data['ticket_list'][ticketkey].number = clubCurrentConsecutive+1;
               clubCurrentConsecutive++;
             }
-          
+            if (data['ticket_list'][ticketkey].ticket_type == 'tickets') {
+              data['ticket_list'][ticketkey].number = "-";
+            }
           });
 
           value = JSON.stringify(data[key]);
