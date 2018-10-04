@@ -6,6 +6,8 @@ const axios = require('axios');
 const { check, validationResult } = require('express-validator/check');
 
 
+
+
 //Adds recommendations to products.
 router.put('/recommendations', [
     // productId must be a number
@@ -139,9 +141,9 @@ router.get('/recommendations', [
                 recommendations: []
               };
               var metaData = response["metafields"];
-              metaData.forEach(order => {
-                if (order.key != "description_tag" && order.key != "title_tag" ) {
-                    result.recommendations.push({key:order.key,recommendationId:order.value});
+              metaData.forEach(product => {
+                if (product.key != "description_tag" && product.key != "title_tag" ) {
+                    result.recommendations.push({key:product.key,recommendationId:product.value});
                 }
               });
               res.send(result);
@@ -151,7 +153,29 @@ router.get('/recommendations', [
             });
 });
 
-
+//Gets recommendations for a product recommendations to products.
+router.get('/all', [
+    // productId must be a number
+  ], (req, res) => {
+    // Finds the validation errors in this request and wraps them in an object with handy functions
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    var productList = [];
+    
+    api.getData('/admin/products.json')
+            .then(response => {
+              var products = response["products"];
+              products.forEach(product => {
+                productList.push({id: product.id,title:product.title,type:product.product_type})
+              });
+              res.send(productList);
+            })
+            .catch(error => {
+              res.status(400).send(error.response.data);
+            });
+});
 
 module.exports = router; 
 

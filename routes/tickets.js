@@ -52,10 +52,8 @@ router.get('/all', [
       });
         
       Promise.all(promises).then(results => {
-        
         for (var i in results) {
-          var metafieldsData = results[i].metafields;
-          
+          var metafieldsData = results[i].metafields; 
           var orderId;
           //Iterate throught the metafields and map every metafield.
           for (var j in metafieldsData) {
@@ -108,7 +106,9 @@ router.get('/all', [
                   }
                   newOrder.ticketList.push(newTicket); 
                 }
-                finalList.push(newOrder);
+                if(newOrder.ticketList.length > 0){
+                  finalList.push(newOrder);
+                }
             }
           }
         }
