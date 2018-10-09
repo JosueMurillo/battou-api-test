@@ -97,7 +97,7 @@ router.get('/all', [
                 var newOrder;
                 for (var k in ticket_list) {      
                   if (ticketType == ticket_list[k].ticket_type || ticketType == "any") {
-                    if( k == 0 ){
+                    if( min == 0 ){
                       min = ticket_list[k].number;
                     }
                     if(ticket_list[k].number < min){
@@ -161,15 +161,21 @@ router.get('/ticketdata', [
       var order = response.order;
 
       api.getData('/admin/orders/'+orderId+'/metafields.json').then(response => {
+        var fullfillDate= "-";
+        for (i in order.fulfillments){
+          fullfillDate = order.fulfillments[i].created_at;
+        }
         shopifyOrderOb = {
           orderId:            order.id,
           dateCreated:        order.created_at,
           orderNumber:        order.name,
           totalPrice:         order.total_price,
           fullfillmentStatus: order.fulfillment_status,
+          fullfillDate:       fullfillDate,
           name:               order.billing_address.first_name,
           lastname:           order.billing_address.last_name,
           willCall:           "",
+          notes:              "",
           isGift:             "",
           giftName:           "",
           giftMail:           "",
@@ -195,6 +201,9 @@ router.get('/ticketdata', [
           }
           if(metafieldsData[j].key == "gift_message"){
             shopifyOrderOb.giftMessage = metafieldsData[j].value;
+          }
+          if(metafieldsData[j].key == "notes"){
+            shopifyOrderOb.notes = metafieldsData[j].value;
           }
           if(metafieldsData[j].key == "ticket_list"){
             var ticket_list = JSON.parse(metafieldsData[j].value);
