@@ -6,7 +6,8 @@ const axios = require('axios');
 const { check, validationResult } = require('express-validator/check');
 
 router.get('/all', [
-    check('status').isString()
+    check('status').isString(),
+    check('ticketType').isString()
   ], (req, res) => {
     // Finds the validation errors in this request and wraps them in an object with handy functions
     const errors = validationResult(req);
@@ -17,6 +18,7 @@ router.get('/all', [
 
     var promises = [];
     var status = req.query.status;
+    var ticketType = req.query.ticketType;
     var orders = {};
     var finalList = [];
       
@@ -24,6 +26,11 @@ router.get('/all', [
     api.getData('/admin/orders.json?status='+status).then(response => {
       var ordersData =response.orders;
       ordersData.forEach(order => {
+        var fullfillDate= "-";
+
+        for (i in order.fulfillments){
+          fullfillDate = order.fulfillments[i].created_at;
+        }
         promises.push(api.getData('/admin/orders/'+order.id+'/metafields.json'));
 
         shopifyOrderOb = {
@@ -32,9 +39,11 @@ router.get('/all', [
           orderNumber:        order.name,
           totalPrice:         order.total_price,
           fullfillmentStatus: order.fulfillment_status,
+          fullfillDate:       fullfillDate,
           name:               order.billing_address.first_name,
           lastname:           order.billing_address.last_name,
           willCall:           "",
+          notes:              "",
           isGift:             "",
           giftName:           "",
           giftMail:           "",
@@ -73,41 +82,52 @@ router.get('/all', [
             if(metafieldsData[j].key == "gift_message"){
               orders[orderId].giftMessage = metafieldsData[j].value;
             }
+            if(metafieldsData[j].key == "notes"){
+              orders[orderId].notes = metafieldsData[j].value;
+            }
           }
           //Iterate through the ticket list to create a row for each ticket on the ticket list metafield
           for (var j in metafieldsData) {
             if(metafieldsData[j].key == "ticket_list"){
                 var ticket_list = JSON.parse(metafieldsData[j].value);
-                var newOrder = {
-                    orderId:              orders[orderId].orderId,
-                    dateCreated:          orders[orderId].dateCreated,
-                    orderNumber:          orders[orderId].orderNumber,
-                    totalPrice:           orders[orderId].totalPrice,
-                    fullfillmentStatus:   orders[orderId].fullfillmentStatus,
-                    name:                 orders[orderId].name,
-                    lastname:             orders[orderId].lastname,
-                    willCall:             orders[orderId].willCall,
-                    isGift:               orders[orderId].isGift,
-                    giftMail:             orders[orderId].giftMail,
-                    giftName:             orders[orderId].giftName,
-                    giftMessage:          orders[orderId].giftMessage,
-                    ticketList:           []
-                };
-                for (var k in ticket_list) {
-                  var newTicket = {
-                    ticketNumber:   ticket_list[k].number,
-                    ticketStatus:   ticket_list[k].status,
-                    ticketName:     ticket_list[k].name,
-                    ticketLastname: ticket_list[k].lastName,
-                    ticketType:     ticket_list[k].ticket_type,
-                    ticketLineItem: ticket_list[k].line_item,
-                    ticketId:       ticket_list[k].ticket_id,
-                    ticketTitle:    ticket_list[k].ticket_title,
-                  }
-                  newOrder.ticketList.push(newTicket); 
+                var order_list = [];
+                var min=0;
+                var max=0;
+                var totalTickets=0;
+                var newOrder;
+                for (var k in ticket_list) {      
+                  if (ticketType == ticket_list[k].ticket_type || ticketType == "any") {
+                    if( k == 0 ){
+                      min = ticket_list[k].number;
+                    }
+                    if(ticket_list[k].number < min){
+                      min = ticket_list[k].number;
+                    }
+                    if(ticket_list[k].number > max){
+                      max = ticket_list[k].number;
+                    }
+                    totalTickets++;
+                    if(k == ticket_list.length - 1){
+                      newOrder = {
+                      orderId:              orders[orderId].orderId,
+                      orderNumber:          orders[orderId].orderNumber,
+                      name:                 orders[orderId].name,
+                      lastname:             orders[orderId].lastname,
+                      totalTickets:         totalTickets,
+                      minNumber:            min,
+                      maxNumber:            max,
+                      dateCreated:          orders[orderId].dateCreated,
+                      fullfillmentStatus:   orders[orderId].fullfillmentStatus,
+                      fullfillDate:         orders[orderId].fullfillDate,                  
+                      willCall:             orders[orderId].willCall,
+                      notes:                orders[orderId].notes
+                      }; 
+                    }    
+                  } 
                 }
-                if(newOrder.ticketList.length > 0){
-                  finalList.push(newOrder);
+                if (newOrder !== undefined) {
+                      finalList.push(newOrder);
+                      newOrder=undefined;
                 }
             }
           }

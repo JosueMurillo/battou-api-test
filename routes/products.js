@@ -143,7 +143,7 @@ router.get('/recommendations', [
               var metaData = response["metafields"];
               metaData.forEach(product => {
                 if (product.key != "description_tag" && product.key != "title_tag" ) {
-                    result.recommendations.push({key:product.key,recommendationId:product.value});
+                    result.recommendations.push({key:product.key,id:product.value});
                 }
               });
               res.send(result);
