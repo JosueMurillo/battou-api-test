@@ -148,7 +148,9 @@ module.exports = router;
 	"gift_name": "Kimberly",
 	"gift_mail": "kim.morales@gmail.com",
 	"gift_message": "Gift",
+  "gift_from" : "someone"
   "will_call":"true",
+  "notes":"some note",
 	"ticket_list": [{
 		"name": "Yerlin",
 		"lastName": "Gómez",

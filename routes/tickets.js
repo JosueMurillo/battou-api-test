@@ -48,6 +48,7 @@ router.get('/all', [
           giftName:           "",
           giftMail:           "",
           giftMessage:        "",
+          giftFrom:           "",
           ticketNumber:       "",
           ticketStatus:       "",
           ticketName:         "",
@@ -81,6 +82,9 @@ router.get('/all', [
             }
             if(metafieldsData[j].key == "gift_message"){
               orders[orderId].giftMessage = metafieldsData[j].value;
+            }
+            if(metafieldsData[j].key == "gift_from"){
+              orders[orderId].giftFrom = metafieldsData[j].value;
             }
             if(metafieldsData[j].key == "notes"){
               orders[orderId].notes = metafieldsData[j].value;
@@ -120,6 +124,11 @@ router.get('/all', [
                       fullfillmentStatus:   orders[orderId].fullfillmentStatus,
                       fullfillDate:         orders[orderId].fullfillDate,                  
                       willCall:             orders[orderId].willCall,
+                      isGift:               orders[orderId].isGift,
+                      giftFrom:             orders[orderId].giftFrom,
+                      giftName:             orders[orderId].giftName,
+                      giftMail:             orders[orderId].giftMail, 
+                      giftMessage:          orders[orderId].giftMessage, 
                       notes:                orders[orderId].notes
                       }; 
                     }    
@@ -177,9 +186,11 @@ router.get('/ticketdata', [
           willCall:           "",
           notes:              "",
           isGift:             "",
+          giftFrom:           "",
           giftName:           "",
           giftMail:           "",
           giftMessage:        "",
+          giftFrom:           "",
           ticketList:         [],
         }; 
 
@@ -201,6 +212,9 @@ router.get('/ticketdata', [
           }
           if(metafieldsData[j].key == "gift_message"){
             shopifyOrderOb.giftMessage = metafieldsData[j].value;
+          }
+          if(metafieldsData[j].key == "gift_from"){
+            shopifyOrderOb.giftFrom = metafieldsData[j].value;
           }
           if(metafieldsData[j].key == "notes"){
             shopifyOrderOb.notes = metafieldsData[j].value;
@@ -314,6 +328,30 @@ router.put('/metadata', [
               metafield: {
                 id: metafield.id,
                 value: metadata.giftMessage
+              }
+            }
+            api.putData('/admin/metafields/' + metafield.id + '.json',shopifyMetaOb).then(response => {
+            }).catch(error => {
+                res.status(400).send(error.response.data);
+              }); 
+        }
+        if (metafield.key == "gift_from" && metafield.value != metadata.gift_from) {
+            shopifyMetaOb = {
+              metafield: {
+                id: metafield.id,
+                value: metadata.giftFrom
+              }
+            }
+            api.putData('/admin/metafields/' + metafield.id + '.json',shopifyMetaOb).then(response => {
+            }).catch(error => {
+                res.status(400).send(error.response.data);
+              }); 
+        }
+        if (metafield.key == "notes" && metafield.value != metadata.notes) {
+            shopifyMetaOb = {
+              metafield: {
+                id: metafield.id,
+                value: metadata.notes
               }
             }
             api.putData('/admin/metafields/' + metafield.id + '.json',shopifyMetaOb).then(response => {
