@@ -150,7 +150,7 @@ router.get('/all', [
 });
 
 
-//Get the data of a specific order.
+//Get the ticket data of a specific order.
 router.get('/ticketdata', [
     check('status').isString(),
     check('orderId').isInt()
@@ -165,6 +165,7 @@ router.get('/ticketdata', [
     var promises = [];
     var status = req.query.status;
     var orderId= req.query.orderId;
+    var finalList= [];
     //Get all the orders with a certain status
     api.getData('/admin/orders/'+ orderId +'.json?status='+status).then(response => {
       var order = response.order;
@@ -190,8 +191,14 @@ router.get('/ticketdata', [
           giftName:           "",
           giftMail:           "",
           giftMessage:        "",
-          giftFrom:           "",
-          ticketList:         [],
+          ticketNumber:       "",
+          ticketStatus:       "",
+          ticketName:         "",
+          ticketLastname:     "",
+          ticketType:         "",
+          ticketLineItem:     "",
+          ticketId:           "",
+          ticketTitle:        ""
         }; 
 
       
@@ -219,24 +226,41 @@ router.get('/ticketdata', [
           if(metafieldsData[j].key == "notes"){
             shopifyOrderOb.notes = metafieldsData[j].value;
           }
-          if(metafieldsData[j].key == "ticket_list"){
+        }
+        for (var j in metafieldsData) {
+          if(metafieldsData[j].key == "ticket_list"){  
             var ticket_list = JSON.parse(metafieldsData[j].value);
             for (var k in ticket_list) {
               var newTicket = {
-                ticketNumber:   ticket_list[k].number,
-                ticketStatus:   ticket_list[k].status,
-                ticketName:     ticket_list[k].name,
-                ticketLastname: ticket_list[k].lastName,
-                ticketType:     ticket_list[k].ticket_type,
-                ticketLineItem: ticket_list[k].line_item,
-                ticketId:       ticket_list[k].ticket_id,
-                ticketTitle:    ticket_list[k].ticket_title,
-              }
-              shopifyOrderOb.ticketList.push(newTicket); 
+              orderId:            order.id,
+              dateCreated:        order.created_at,
+              orderNumber:        order.name,
+              totalPrice:         order.total_price,
+              fullfillmentStatus: order.fulfillment_status,
+              fullfillDate:       fullfillDate,
+              name:               order.billing_address.first_name,
+              lastname:           order.billing_address.last_name,
+              willCall:           shopifyOrderOb.willCall,
+              notes:              shopifyOrderOb.notes,
+              isGift:             shopifyOrderOb.isGift,
+              giftFrom:           shopifyOrderOb.giftFrom,
+              giftName:           shopifyOrderOb.giftName,
+              giftMail:           shopifyOrderOb.giftMail,
+              giftMessage:        shopifyOrderOb.giftMessage, 
+              ticketNumber:       ticket_list[k].number,
+              ticketStatus:       ticket_list[k].status,
+              ticketName:         ticket_list[k].name,
+              ticketLastname:     ticket_list[k].lastName,
+              ticketType:         ticket_list[k].ticket_type,
+              ticketLineItem:     ticket_list[k].line_item,
+              ticketId:           ticket_list[k].ticket_id,
+              ticketTitle:        ticket_list[k].ticket_title
+              };
+              finalList.push(newTicket); 
             }
           }
         }
-        res.send(shopifyOrderOb);
+        res.send(finalList);
       }).catch(error => {
         res.status(400).send(error.response.data);
       });
