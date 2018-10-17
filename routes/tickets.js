@@ -98,7 +98,8 @@ router.get('/all', [
                 var max=0;
                 var totalTickets=0;
                 var newOrder;
-                for (var k in ticket_list) {      
+                for (var k in ticket_list) {     
+                console.log(ticket_list[k].ticket_type); 
                   if (ticketType == ticket_list[k].ticket_type || ticketType == "any") {
                     if( min == 0 ){
                       min = ticket_list[k].number;
@@ -110,8 +111,10 @@ router.get('/all', [
                       max = ticket_list[k].number;
                     }
                     totalTickets++;
-                    if(k == ticket_list.length - 1){
-                      newOrder = {
+                  } 
+                }
+                if(totalTickets>0){
+                  newOrder = {
                       orderId:              orders[orderId].orderId,
                       orderNumber:          orders[orderId].orderNumber,
                       name:                 orders[orderId].name,
@@ -129,9 +132,7 @@ router.get('/all', [
                       giftMail:             orders[orderId].giftMail, 
                       giftMessage:          orders[orderId].giftMessage, 
                       notes:                orders[orderId].notes
-                      }; 
-                    }    
-                  } 
+                      }
                 }
                 if (newOrder !== undefined) {
                       finalList.push(newOrder);
