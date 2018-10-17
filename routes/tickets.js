@@ -27,19 +27,18 @@ router.get('/all', [
       var ordersData =response.orders;
       ordersData.forEach(order => {
         var fullfillDate= "-";
-
         for (i in order.fulfillments){
-          fullfillDate = order.fulfillments[i].created_at;
+          fullfillDate = order.fulfillments[i].updated_at;
         }
         promises.push(api.getData('/admin/orders/'+order.id+'/metafields.json'));
 
         shopifyOrderOb = {
           orderId:            order.id,
-          dateCreated:        order.created_at,
+          dateCreated:        order.created_at.split("T")[0],
           orderNumber:        order.name,
           totalPrice:         order.total_price,
           fullfillmentStatus: order.fulfillment_status,
-          fullfillDate:       fullfillDate,
+          fullfillDate:       fullfillDate.split("T")[0],
           name:               order.billing_address.first_name,
           lastname:           order.billing_address.last_name,
           willCall:           "",
@@ -173,15 +172,16 @@ router.get('/ticketdata', [
       api.getData('/admin/orders/'+orderId+'/metafields.json').then(response => {
         var fullfillDate= "-";
         for (i in order.fulfillments){
-          fullfillDate = order.fulfillments[i].created_at;
+          fullfillDate = order.fulfillments[i].updated_at;
         }
+        fullfillDate = fullfillDate.split("T")[0];
         shopifyOrderOb = {
           orderId:            order.id,
-          dateCreated:        order.created_at,
+          dateCreated:        order.created_at.split("T")[0],
           orderNumber:        order.name,
           totalPrice:         order.total_price,
           fullfillmentStatus: order.fulfillment_status,
-          fullfillDate:       fullfillDate,
+          fullfillDate:       fullfillDate.split("T")[0],
           name:               order.billing_address.first_name,
           lastname:           order.billing_address.last_name,
           willCall:           "",
