@@ -171,18 +171,13 @@ router.get('/ticketdata', [
       var order = response.order;
 
       api.getData('/admin/orders/'+orderId+'/metafields.json').then(response => {
-        var fullfillDate= "-";
-        for (i in order.fulfillments){
-          fullfillDate = order.fulfillments[i].updated_at;
-        }
-        fullfillDate = fullfillDate.split("T")[0];
         shopifyOrderOb = {
           orderId:            order.id,
           dateCreated:        order.created_at.split("T")[0],
           orderNumber:        order.name,
           totalPrice:         order.total_price,
-          fullfillmentStatus: order.fulfillment_status,
-          fullfillDate:       fullfillDate.split("T")[0],
+          fullfillmentStatus: "",
+          fullfillDate:       "",
           name:               order.billing_address.first_name,
           lastname:           order.billing_address.last_name,
           willCall:           "",
@@ -232,12 +227,28 @@ router.get('/ticketdata', [
           if(metafieldsData[j].key == "ticket_list"){  
             var ticket_list = JSON.parse(metafieldsData[j].value);
             for (var k in ticket_list) {
+
+              var itemId = ticket_list[k].line_item;
+              var fullfillDate= "-";
+              var fulfillStatus= "-";
+              for (i in order.fulfillments){
+                fullfillDate= "-";
+                fulfillStatus= "-";
+                var line_items = order.fulfillments[i].line_items;
+                for(l in line_items){
+                  if(line_items[l].id == itemId ){
+                    console.log(order.fulfillments[i].updated_at.split("T")[0]);
+                    fulfillStatus = line_items[l].fulfillment_status;
+                    fullfillDate = order.fulfillments[i].updated_at.split("T")[0];
+                  }
+                }
+              }
               var newTicket = {
               orderId:            order.id,
-              dateCreated:        order.created_at,
+              dateCreated:        order.created_at.split("T")[0],
               orderNumber:        order.name,
               totalPrice:         order.total_price,
-              fullfillmentStatus: order.fulfillment_status,
+              fullfillmentStatus: fulfillStatus,
               fullfillDate:       fullfillDate,
               name:               order.billing_address.first_name,
               lastname:           order.billing_address.last_name,
